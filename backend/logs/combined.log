@@ -1,0 +1,19 @@
+{"level":"info","message":"Server running in development mode on port 5000","timestamp":"2026-06-26 00:10:02"}
+{"level":"info","message":"Health check: http://localhost:5000/health","timestamp":"2026-06-26 00:10:02"}
+{"level":"info","message":"API Base URL: http://localhost:5000/api","timestamp":"2026-06-26 00:10:02"}
+{"level":"error","message":"Error connecting to MongoDB: querySrv ECONNREFUSED _mongodb._tcp.cluster0.kuh0p3k.mongodb.net","timestamp":"2026-06-26 00:10:02"}
+{"level":"info","message":"Server running in development mode on port 5000","timestamp":"2026-06-26 00:25:29"}
+{"level":"info","message":"Health check: http://localhost:5000/health","timestamp":"2026-06-26 00:25:29"}
+{"level":"info","message":"API Base URL: http://localhost:5000/api","timestamp":"2026-06-26 00:25:29"}
+{"level":"info","message":"MongoDB Connected: ac-eebpw8e-shard-00-00.kuh0p3k.mongodb.net","timestamp":"2026-06-26 00:25:29"}
+{"level":"info","message":"::1 - - [25/Jun/2026:18:56:06 +0000] \"GET /health HTTP/1.1\" 200 133 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0\"","timestamp":"2026-06-26 00:26:06"}
+{"level":"info","message":"::1 - - [25/Jun/2026:18:56:06 +0000] \"GET /favicon.ico HTTP/1.1\" 404 58 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0\"","timestamp":"2026-06-26 00:26:06"}
+{"level":"info","message":"::1 - - [25/Jun/2026:19:03:30 +0000] \"GET / HTTP/1.1\" 404 47 \"-\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0\"","timestamp":"2026-06-26 00:33:30"}
+{"level":"info","message":"Server running on http://localhost:5000","timestamp":"2026-06-26 00:34:06"}
+{"level":"info","message":"Frontend: http://localhost:5000","timestamp":"2026-06-26 00:34:07"}
+{"level":"info","message":"API: http://localhost:5000/api","timestamp":"2026-06-26 00:34:07"}
+{"level":"info","message":"MongoDB Connected: ac-eebpw8e-shard-00-00.kuh0p3k.mongodb.net","timestamp":"2026-06-26 00:34:07"}
+{"level":"info","message":"Server running on http://localhost:5000","timestamp":"2026-06-26 10:06:10"}
+{"level":"info","message":"Frontend: http://localhost:5000","timestamp":"2026-06-26 10:06:10"}
+{"level":"info","message":"API: http://localhost:5000/api","timestamp":"2026-06-26 10:06:10"}
+{"level":"info","message":"MongoDB Connected: ac-eebpw8e-shard-00-00.kuh0p3k.mongodb.net","timestamp":"2026-06-26 10:06:11"}

@@ -1,0 +1,235 @@
+/* ============================================
+   DASHBOARD SPECIFIC STYLES
+   ============================================ */
+
+/* Quick Stats Cards */
+.quick-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.quick-stat {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.quick-stat:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.quick-stat .stat-icon {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    font-size: 2rem;
+    opacity: 0.15;
+}
+
+.quick-stat .stat-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+}
+
+.quick-stat .stat-label {
+    font-size: 0.8rem;
+    color: var(--secondary-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.quick-stat .stat-change {
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.quick-stat .stat-change.positive {
+    color: var(--success-color);
+}
+
+.quick-stat .stat-change.negative {
+    color: var(--danger-color);
+}
+
+/* Activity Feed */
+.activity-feed {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.activity-feed .feed-item {
+    display: flex;
+    align-items: start;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.activity-feed .feed-item:last-child {
+    border-bottom: none;
+}
+
+.activity-feed .feed-item .feed-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.activity-feed .feed-item .feed-content {
+    flex: 1;
+}
+
+.activity-feed .feed-item .feed-content .feed-title {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.1rem;
+}
+
+.activity-feed .feed-item .feed-content .feed-time {
+    font-size: 0.8rem;
+    color: #b0b3c0;
+}
+
+/* Chart Wrappers */
+.chart-wrapper {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    box-shadow: var(--shadow-md);
+}
+
+.chart-wrapper .chart-title {
+    font-weight: 700;
+    color: var(--dark-color);
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.chart-wrapper .chart-subtitle {
+    color: var(--secondary-color);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+/* Top Products List */
+.top-products {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.top-products li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.top-products li:last-child {
+    border-bottom: none;
+}
+
+.top-products li .product-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.top-products li .product-info .product-rank {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--light-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--secondary-color);
+}
+
+.top-products li .product-info .product-name {
+    font-weight: 600;
+}
+
+.top-products li .product-info .product-sku {
+    font-size: 0.75rem;
+    color: #b0b3c0;
+}
+
+.top-products li .product-revenue {
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+/* Progress Bars */
+.progress-bar-custom {
+    height: 8px;
+    border-radius: 4px;
+    background: #e9ecef;
+    overflow: hidden;
+    margin-top: 0.25rem;
+}
+
+.progress-bar-custom .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease;
+}
+
+.progress-bar-custom .progress-fill.primary {
+    background: var(--primary-color);
+}
+
+.progress-bar-custom .progress-fill.success {
+    background: var(--success-color);
+}
+
+.progress-bar-custom .progress-fill.warning {
+    background: var(--warning-color);
+}
+
+.progress-bar-custom .progress-fill.danger {
+    background: var(--danger-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .quick-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+    
+    .quick-stat .stat-value {
+        font-size: 1.25rem;
+    }
+    
+    .quick-stat .stat-icon {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .quick-stats {
+        grid-template-columns: 1fr;
+    }
+}

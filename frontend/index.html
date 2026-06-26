@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management System</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/products.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-boxes me-2"></i>Inventory Management
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#dashboard" onclick="showPage('dashboard')">
+                            <i class="fas fa-chart-pie me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#products" onclick="showPage('products')">
+                            <i class="fas fa-box me-1"></i>Products
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#categories" onclick="showPage('categories')">
+                            <i class="fas fa-tags me-1"></i>Categories
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#suppliers" onclick="showPage('suppliers')">
+                            <i class="fas fa-truck me-1"></i>Suppliers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#orders" onclick="showPage('orders')">
+                            <i class="fas fa-shopping-cart me-1"></i>Orders
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#inventory" onclick="showPage('inventory')">
+                            <i class="fas fa-warehouse me-1"></i>Inventory
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#reports" onclick="showPage('reports')">
+                            <i class="fas fa-file-alt me-1"></i>Reports
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>
+                            <span id="userName">User</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#" onclick="showProfile()"><i class="fas fa-user-cog me-2"></i>Profile</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="changePassword()"><i class="fas fa-key me-2"></i>Change Password</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="#" onclick="logout()"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-4">
+        <div id="pageContent">
+            <!-- Dashboard will be loaded by default -->
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MODALS -->
+    <!-- ============================================ -->
+
+    <!-- Product Modal -->
+    <div class="modal fade" id="productModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="productModalTitle">Add Product</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="productForm">
+                        <input type="hidden" id="productId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="sku" class="form-label">SKU *</label>
+                                <input type="text" class="form-control" id="sku" required placeholder="PRD001">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="productName" class="form-label">Product Name *</label>
+                                <input type="text" class="form-control" id="productName" required placeholder="Product Name">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="productDescription" rows="2" placeholder="Product description"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="category" class="form-label">Category *</label>
+                                <select class="form-control" id="category" required>
+                                    <option value="">Select Category</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="supplier" class="form-label">Supplier</label>
+                                <select class="form-control" id="supplier">
+                                    <option value="">Select Supplier</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="unit" class="form-label">Unit *</label>
+                                <select class="form-control" id="unit" required>
+                                    <option value="pcs">Pieces</option>
+                                    <option value="kg">Kilogram</option>
+                                    <option value="g">Gram</option>
+                                    <option value="l">Liter</option>
+                                    <option value="ml">Milliliter</option>
+                                    <option value="m">Meter</option>
+                                    <option value="cm">Centimeter</option>
+                                    <option value="box">Box</option>
+                                    <option value="pack">Pack</option>
+                                    <option value="set">Set</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="costPrice" class="form-label">Cost Price *</label>
+                                <input type="number" class="form-control" id="costPrice" step="0.01" required placeholder="0.00">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="sellingPrice" class="form-label">Selling Price *</label>
+                                <input type="number" class="form-control" id="sellingPrice" step="0.01" required placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="wholesalePrice" class="form-label">Wholesale Price</label>
+                                <input type="number" class="form-control" id="wholesalePrice" step="0.01" placeholder="0.00">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="taxRate" class="form-label">Tax Rate (%)</label>
+                                <input type="number" class="form-control" id="taxRate" step="0.01" value="0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="weight" class="form-label">Weight (kg)</label>
+                                <input type="number" class="form-control" id="weight" step="0.01" placeholder="0.00">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="stockQuantity" class="form-label">Stock Quantity</label>
+                                <input type="number" class="form-control" id="stockQuantity" value="0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="minThreshold" class="form-label">Min Threshold</label>
+                                <input type="number" class="form-control" id="minThreshold" value="10">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="maxThreshold" class="form-label">Max Threshold</label>
+                                <input type="number" class="form-control" id="maxThreshold" placeholder="Optional">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="productIsActive" checked>
+                                    <label class="form-check-label" for="productIsActive">Active</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="productIsFeatured">
+                                    <label class="form-check-label" for="productIsFeatured">Featured</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="productImage" class="form-label">Product Image</label>
+                            <input type="file" class="form-control" id="productImage" accept="image/*">
+                            <img id="currentImagePreview" style="display:none; margin-top:10px; max-width:100px; max-height:100px; border-radius:8px;">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveProduct()">Save Product</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal fade" id="categoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="categoryModalTitle">Add Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="categoryForm">
+                        <input type="hidden" id="categoryId">
+                        <div class="mb-3">
+                            <label for="categoryName" class="form-label">Category Name *</label>
+                            <input type="text" class="form-control" id="categoryName" required placeholder="Category Name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoryDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="categoryDescription" rows="3" placeholder="Category description"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoryParent" class="form-label">Parent Category</label>
+                            <select class="form-control" id="categoryParent">
+                                <option value="">None (Top Level)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoryImage" class="form-label">Category Image</label>
+                            <input type="file" class="form-control" id="categoryImage" accept="image/*">
+                            <img id="categoryImagePreview" style="display:none; margin-top:10px; max-width:100px; max-height:100px; border-radius:8px;">
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="categoryIsActive" checked>
+                            <label class="form-check-label" for="categoryIsActive">Active</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveCategory()">Save Category</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supplier Modal -->
+    <div class="modal fade" id="supplierModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="supplierModalTitle">Add Supplier</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="supplierForm">
+                        <input type="hidden" id="supplierId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="supplierName" class="form-label">Supplier Name *</label>
+                                <input type="text" class="form-control" id="supplierName" required placeholder="John Doe">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="supplierCompany" class="form-label">Company *</label>
+                                <input type="text" class="form-control" id="supplierCompany" required placeholder="Company Name">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="supplierEmail" class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="supplierEmail" required placeholder="email@company.com">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="supplierPhone" class="form-label">Phone *</label>
+                                <input type="tel" class="form-control" id="supplierPhone" required placeholder="+1234567890">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="supplierTaxId" class="form-label">Tax ID</label>
+                            <input type="text" class="form-control" id="supplierTaxId" placeholder="Tax ID">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <div class="row">
+                                <div class="col-md-6 mb-2">
+                                    <input type="text" class="form-control" id="supplierStreet" placeholder="Street">
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <input type="text" class="form-control" id="supplierCity" placeholder="City">
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <input type="text" class="form-control" id="supplierState" placeholder="State">
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <input type="text" class="form-control" id="supplierZip" placeholder="Zip Code">
+                                </div>
+                                <div class="col-md-4 mb-2">
+                                    <input type="text" class="form-control" id="supplierCountry" placeholder="Country">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="supplierPaymentTerms" class="form-label">Payment Terms</label>
+                                <select class="form-control" id="supplierPaymentTerms">
+                                    <option value="net30">Net 30</option>
+                                    <option value="net60">Net 60</option>
+                                    <option value="net90">Net 90</option>
+                                    <option value="cod">COD</option>
+                                    <option value="prepaid">Prepaid</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="supplierLeadTime" class="form-label">Lead Time (days)</label>
+                                <input type="number" class="form-control" id="supplierLeadTime" value="7">
+                            </div>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="supplierIsActive" checked>
+                            <label class="form-check-label" for="supplierIsActive">Active</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveSupplier()">Save Supplier</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div class="modal fade" id="orderModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderModalTitle">Create Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="orderForm">
+                        <input type="hidden" id="orderId">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="orderType" class="form-label">Order Type *</label>
+                                <select class="form-control" id="orderType" required onchange="toggleOrderFields()">
+                                    <option value="sale">Sale</option>
+                                    <option value="purchase">Purchase</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="paymentMethod" class="form-label">Payment Method</label>
+                                <select class="form-control" id="paymentMethod">
+                                    <option value="cash">Cash</option>
+                                    <option value="credit_card">Credit Card</option>
+                                    <option value="debit_card">Debit Card</option>
+                                    <option value="bank_transfer">Bank Transfer</option>
+                                    <option value="online">Online</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3" id="supplierField">
+                                <label for="orderSupplier" class="form-label">Supplier</label>
+                                <select class="form-control" id="orderSupplier">
+                                    <option value="">Select Supplier</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3" id="customerField">
+                                <label for="customerName" class="form-label">Customer Name</label>
+                                <input type="text" class="form-control" id="customerName" placeholder="Customer Name">
+                            </div>
+                        </div>
+
+                        <div class="row" id="customerDetails" style="display:none;">
+                            <div class="col-md-6 mb-3">
+                                <label for="customerEmail" class="form-label">Customer Email</label>
+                                <input type="email" class="form-control" id="customerEmail" placeholder="customer@email.com">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="customerPhone" class="form-label">Customer Phone</label>
+                                <input type="tel" class="form-control" id="customerPhone" placeholder="Phone number">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Order Items</label>
+                            <div id="orderItemsContainer">
+                                <div class="order-item row mb-2">
+                                    <div class="col-md-5">
+                                        <select class="form-control product-select" onchange="updateItemTotal(this)">
+                                            <option value="">Select Product</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="number" class="form-control item-quantity" placeholder="Qty" value="1" min="1" onchange="updateItemTotal(this)">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" class="form-control item-price" placeholder="Price" step="0.01" onchange="updateItemTotal(this)">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="button" class="btn btn-danger btn-sm" onclick="removeOrderItem(this)">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="addOrderItem()">
+                                <i class="fas fa-plus"></i> Add Item
+                            </button>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="orderDiscount" class="form-label">Discount</label>
+                                <input type="number" class="form-control" id="orderDiscount" step="0.01" value="0">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="orderShipping" class="form-label">Shipping Cost</label>
+                                <input type="number" class="form-control" id="orderShipping" step="0.01" value="0">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="orderNotes" class="form-label">Notes</label>
+                                <textarea class="form-control" id="orderNotes" rows="2" placeholder="Order notes"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <strong>Subtotal: </strong> <span id="orderSubtotal">$0.00</span>
+                            <strong class="ms-3">Tax (10%): </strong> <span id="orderTax">$0.00</span>
+                            <strong class="ms-3">Total: </strong> <span id="orderTotalDisplay">$0.00</span>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveOrder()">Save Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Adjust Stock Modal -->
+    <div class="modal fade" id="adjustModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adjust Stock</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="adjustForm">
+                        <div class="mb-3">
+                            <label for="adjustProductId" class="form-label">Product *</label>
+                            <select class="form-control" id="adjustProductId" required>
+                                <option value="">Select Product</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adjustQuantity" class="form-label">Quantity *</label>
+                            <input type="number" class="form-control" id="adjustQuantity" required placeholder="e.g., 10 or -5">
+                            <small class="text-muted">Positive to add stock, negative to subtract</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="adjustReason" class="form-label">Reason</label>
+                            <input type="text" class="form-control" id="adjustReason" placeholder="e.g., Restock, Damaged, etc.">
+                        </div>
+                        <div class="mb-3">
+                            <label for="adjustNotes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="adjustNotes" rows="2" placeholder="Additional notes"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveAdjustment()">Save Adjustment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal fade" id="changePasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Change Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="changePasswordForm">
+                        <div class="mb-3">
+                            <label for="currentPassword" class="form-label">Current Password *</label>
+                            <input type="password" class="form-control" id="currentPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">New Password *</label>
+                            <input type="password" class="form-control" id="newPassword" required minlength="6">
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmNewPassword" class="form-label">Confirm New Password *</label>
+                            <input type="password" class="form-control" id="confirmNewPassword" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="savePasswordChange()">Change Password</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="js/app.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/products.js"></script>
+    <script src="js/categories.js"></script>
+    <script src="js/suppliers.js"></script>
+    <script src="js/orders.js"></script>
+    <script src="js/inventory.js"></script>
+    <script src="js/reports.js"></script>
+</body>
+</html>

@@ -1,0 +1,453 @@
+/**
+ * Suppliers Module
+ * Handles supplier CRUD operations
+ * @version 1.0.0
+ */
+
+var currentSupplierPage = 1;
+var supplierSearchTerm = '';
+var supplierFilters = {};
+
+/**
+ * Load suppliers page
+ */
+async function loadSuppliers() {
+    showLoader();
+    var content = document.getElementById('pageContent');
+
+    try {
+        var response = await api.get('/suppliers', {
+            page: currentSupplierPage,
+            limit: 10,
+            search: supplierSearchTerm,
+            isActive: supplierFilters.isActive || undefined,
+        });
+
+        var suppliers = response.data || [];
+        var pagination = response.pagination || {};
+
+        var html = '';
+        html += '<div class="page-content">';
+        html += '<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">';
+        html += '<h2><i class="fas fa-truck me-2"></i>Suppliers</h2>';
+        html += '<div class="d-flex gap-2 flex-wrap">';
+        html += '<button class="btn btn-primary" onclick="openSupplierModal()">';
+        html += '<i class="fas fa-plus me-1"></i>Add Supplier';
+        html += '</button>';
+        html += '<button class="btn btn-success" onclick="exportSuppliers()">';
+        html += '<i class="fas fa-file-csv me-1"></i>Export';
+        html += '</button>';
+        html += '</div>';
+        html += '</div>';
+
+        // Search Bar
+        html += '<div class="search-bar mb-4">';
+        html += '<div class="row">';
+        html += '<div class="col-md-8">';
+        html += '<i class="fas fa-search"></i>';
+        html += '<input type="text" id="supplierSearch" placeholder="Search suppliers by name, company, or email..." value="' + supplierSearchTerm + '" onkeyup="handleSupplierSearch(event)">';
+        html += '</div>';
+        html += '<div class="col-md-4">';
+        html += '<select class="form-control" id="statusFilter" onchange="applySupplierFilters()">';
+        html += '<option value="">All Status</option>';
+        html += '<option value="true">Active</option>';
+        html += '<option value="false">Inactive</option>';
+        html += '</select>';
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+
+        // Suppliers Table
+        html += '<div class="table-container">';
+        html += '<div class="table-responsive">';
+        html += '<table class="table table-hover">';
+        html += '<thead>';
+        html += '<tr>';
+        html += '<th>Name</th>';
+        html += '<th>Company</th>';
+        html += '<th>Email</th>';
+        html += '<th>Phone</th>';
+        html += '<th>Payment Terms</th>';
+        html += '<th>Status</th>';
+        html += '<th class="text-center">Actions</th>';
+        html += '</tr>';
+        html += '</thead>';
+        html += '<tbody>';
+
+        if (suppliers.length === 0) {
+            html += '<tr>';
+            html += '<td colspan="7" class="text-center py-4">';
+            html += '<i class="fas fa-truck fa-3x d-block mb-2 text-muted"></i>';
+            html += '<p class="text-muted">No suppliers found</p>';
+            html += '<button class="btn btn-primary btn-sm" onclick="openSupplierModal()">';
+            html += '<i class="fas fa-plus me-1"></i>Add Supplier';
+            html += '</button>';
+            html += '</td>';
+            html += '</tr>';
+        } else {
+            for (var i = 0; i < suppliers.length; i++) {
+                var supplier = suppliers[i];
+                var taxId = supplier.taxId || 'No Tax ID';
+                var paymentTerms = supplier.paymentTerms || 'N/A';
+                var leadTimeHtml = supplier.leadTime ? '<small class="text-muted d-block">' + supplier.leadTime + ' days</small>' : '';
+                var statusBadge = getStatusBadge(supplier.isActive ? 'active' : 'inactive');
+                var supplierId = supplier._id;
+                var name = supplier.name || '';
+                var company = supplier.company || '';
+                var email = supplier.email || '';
+                var phone = supplier.phone || '';
+
+                html += '<tr>';
+                html += '<td>';
+                html += '<div class="d-flex align-items-center">';
+                html += '<div>';
+                html += '<div class="fw-bold">' + name + '</div>';
+                html += '<small class="text-muted">' + taxId + '</small>';
+                html += '</div>';
+                html += '</div>';
+                html += '</td>';
+                html += '<td><span class="fw-bold">' + company + '</span></td>';
+                html += '<td><a href="mailto:' + email + '" class="text-decoration-none">' + email + '</a></td>';
+                html += '<td><a href="tel:' + phone + '" class="text-decoration-none">' + phone + '</a></td>';
+                html += '<td><span class="badge bg-info">' + paymentTerms + '</span>' + leadTimeHtml + '</td>';
+                html += '<td>' + statusBadge + '</td>';
+                html += '<td class="text-center">';
+                html += '<div class="btn-group btn-group-sm">';
+                html += '<button class="btn btn-info" onclick="viewSupplier(\'' + supplierId + '\')" title="View"><i class="fas fa-eye"></i></button>';
+                html += '<button class="btn btn-primary" onclick="editSupplier(\'' + supplierId + '\')" title="Edit"><i class="fas fa-edit"></i></button>';
+                html += '<button class="btn btn-danger" onclick="deleteSupplier(\'' + supplierId + '\')" title="Delete"><i class="fas fa-trash"></i></button>';
+                html += '</div>';
+                html += '</td>';
+                html += '</tr>';
+            }
+        }
+
+        html += '</tbody>';
+        html += '</table>';
+        html += '</div>';
+        html += '</div>';
+
+        // Pagination
+        if (pagination && pagination.pages > 1) {
+            html += '<nav class="mt-4">';
+            html += '<ul class="pagination justify-content-center">';
+            html += '<li class="page-item ' + (pagination.page <= 1 ? 'disabled' : '') + '">';
+            html += '<a class="page-link" href="#" onclick="changeSupplierPage(' + (pagination.page - 1) + ')">Previous</a>';
+            html += '</li>';
+            
+            for (var p = 1; p <= pagination.pages; p++) {
+                html += '<li class="page-item ' + (p === pagination.page ? 'active' : '') + '">';
+                html += '<a class="page-link" href="#" onclick="changeSupplierPage(' + p + ')">' + p + '</a>';
+                html += '</li>';
+            }
+            
+            html += '<li class="page-item ' + (pagination.page >= pagination.pages ? 'disabled' : '') + '">';
+            html += '<a class="page-link" href="#" onclick="changeSupplierPage(' + (pagination.page + 1) + ')">Next</a>';
+            html += '</li>';
+            html += '</ul>';
+            html += '</nav>';
+        }
+
+        html += '</div>';
+        content.innerHTML = html;
+    } catch (error) {
+        content.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-circle me-2"></i>Error loading suppliers: ' + error.message + '</div>';
+    }
+}
+
+/**
+ * Change supplier page
+ */
+function changeSupplierPage(page) {
+    currentSupplierPage = page;
+    loadSuppliers();
+}
+
+/**
+ * Handle supplier search with debounce
+ */
+var handleSupplierSearch = debounce(function(event) {
+    var input = document.getElementById('supplierSearch');
+    if (input) {
+        supplierSearchTerm = input.value;
+        currentSupplierPage = 1;
+        loadSuppliers();
+    }
+}, 400);
+
+/**
+ * Apply supplier filters
+ */
+function applySupplierFilters() {
+    var statusFilter = document.getElementById('statusFilter');
+    supplierFilters = {
+        isActive: statusFilter ? statusFilter.value || undefined : undefined,
+    };
+    currentSupplierPage = 1;
+    loadSuppliers();
+}
+
+/**
+ * Clear supplier filters
+ */
+function clearSupplierFilters() {
+    var searchInput = document.getElementById('supplierSearch');
+    var statusFilter = document.getElementById('statusFilter');
+    
+    if (searchInput) searchInput.value = '';
+    if (statusFilter) statusFilter.value = '';
+    
+    supplierSearchTerm = '';
+    supplierFilters = {};
+    currentSupplierPage = 1;
+    loadSuppliers();
+}
+
+/**
+ * Open supplier modal for create or edit
+ */
+async function openSupplierModal(supplierId) {
+    supplierId = supplierId || null;
+    
+    var modal = document.getElementById('supplierModal');
+    if (!modal) {
+        modal = document.getElementById('supplierModal');
+    }
+
+    var form = document.getElementById('supplierForm');
+    if (form) form.reset();
+    
+    var supplierIdInput = document.getElementById('supplierId');
+    if (supplierIdInput) supplierIdInput.value = '';
+    
+    var isActiveCheck = document.getElementById('supplierIsActive');
+    if (isActiveCheck) isActiveCheck.checked = true;
+
+    var title = document.getElementById('supplierModalTitle');
+    if (title) {
+        title.textContent = supplierId ? 'Edit Supplier' : 'Add Supplier';
+    }
+
+    if (supplierId) {
+        try {
+            var response = await api.get('/suppliers/' + supplierId);
+            var supplier = response.data;
+            
+            document.getElementById('supplierId').value = supplier._id;
+            document.getElementById('supplierName').value = supplier.name || '';
+            document.getElementById('supplierCompany').value = supplier.company || '';
+            document.getElementById('supplierEmail').value = supplier.email || '';
+            document.getElementById('supplierPhone').value = supplier.phone || '';
+            document.getElementById('supplierTaxId').value = supplier.taxId || '';
+            document.getElementById('supplierStreet').value = (supplier.address && supplier.address.street) ? supplier.address.street : '';
+            document.getElementById('supplierCity').value = (supplier.address && supplier.address.city) ? supplier.address.city : '';
+            document.getElementById('supplierState').value = (supplier.address && supplier.address.state) ? supplier.address.state : '';
+            document.getElementById('supplierZip').value = (supplier.address && supplier.address.zipCode) ? supplier.address.zipCode : '';
+            document.getElementById('supplierCountry').value = (supplier.address && supplier.address.country) ? supplier.address.country : '';
+            document.getElementById('supplierPaymentTerms').value = supplier.paymentTerms || 'net30';
+            document.getElementById('supplierLeadTime').value = supplier.leadTime || 7;
+            document.getElementById('supplierIsActive').checked = supplier.isActive !== false;
+        } catch (error) {
+            showToast('Error loading supplier: ' + error.message, 'error');
+            return;
+        }
+    }
+
+    showModal('supplierModal');
+}
+
+/**
+ * Save supplier (create or update)
+ */
+async function saveSupplier() {
+    var supplierId = document.getElementById('supplierId').value;
+    var data = {
+        name: document.getElementById('supplierName').value.trim(),
+        company: document.getElementById('supplierCompany').value.trim(),
+        email: document.getElementById('supplierEmail').value.trim(),
+        phone: document.getElementById('supplierPhone').value.trim(),
+        taxId: document.getElementById('supplierTaxId').value.trim(),
+        address: {
+            street: document.getElementById('supplierStreet').value.trim(),
+            city: document.getElementById('supplierCity').value.trim(),
+            state: document.getElementById('supplierState').value.trim(),
+            zipCode: document.getElementById('supplierZip').value.trim(),
+            country: document.getElementById('supplierCountry').value.trim(),
+        },
+        paymentTerms: document.getElementById('supplierPaymentTerms').value,
+        leadTime: parseInt(document.getElementById('supplierLeadTime').value) || 7,
+        isActive: document.getElementById('supplierIsActive').checked,
+    };
+
+    // Validate
+    if (!data.name) { showToast('Supplier name is required', 'error'); return; }
+    if (!data.company) { showToast('Company name is required', 'error'); return; }
+    if (!data.email) { showToast('Email is required', 'error'); return; }
+    if (!isValidEmail(data.email)) { showToast('Please enter a valid email', 'error'); return; }
+    if (!data.phone) { showToast('Phone number is required', 'error'); return; }
+
+    try {
+        if (supplierId) {
+            await api.put('/suppliers/' + supplierId, data);
+            showToast('Supplier updated successfully');
+        } else {
+            await api.post('/suppliers', data);
+            showToast('Supplier created successfully');
+        }
+
+        hideModal('supplierModal');
+        loadSuppliers();
+    } catch (error) {
+        showToast('Error saving supplier: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Edit supplier
+ */
+function editSupplier(supplierId) {
+    openSupplierModal(supplierId);
+}
+
+/**
+ * View supplier details
+ */
+async function viewSupplier(supplierId) {
+    try {
+        var response = await api.get('/suppliers/' + supplierId);
+        var supplier = response.data;
+
+        var content = document.getElementById('viewSupplierContent');
+        if (!content) return;
+
+        var addressHtml = '';
+        if (supplier.address) {
+            addressHtml = '<p>' + 
+                (supplier.address.street || '') + '<br>' +
+                (supplier.address.city || '') + ' ' + (supplier.address.state || '') + ' ' + (supplier.address.zipCode || '') + '<br>' +
+                (supplier.address.country || '') +
+            '</p>';
+        } else {
+            addressHtml = '<p class="text-muted">No address provided</p>';
+        }
+
+        content.innerHTML = 
+            '<div class="row">' +
+                '<div class="col-md-6">' +
+                    '<h6 class="text-muted">Personal Information</h6>' +
+                    '<div class="mb-2"><strong>Name:</strong> ' + supplier.name + '</div>' +
+                    '<div class="mb-2"><strong>Company:</strong> ' + supplier.company + '</div>' +
+                    '<div class="mb-2"><strong>Email:</strong> <a href="mailto:' + supplier.email + '">' + supplier.email + '</a></div>' +
+                    '<div class="mb-2"><strong>Phone:</strong> <a href="tel:' + supplier.phone + '">' + supplier.phone + '</a></div>' +
+                    '<div class="mb-2"><strong>Tax ID:</strong> ' + (supplier.taxId || 'N/A') + '</div>' +
+                '</div>' +
+                '<div class="col-md-6">' +
+                    '<h6 class="text-muted">Business Information</h6>' +
+                    '<div class="mb-2"><strong>Payment Terms:</strong> ' + (supplier.paymentTerms || 'N/A') + '</div>' +
+                    '<div class="mb-2"><strong>Lead Time:</strong> ' + (supplier.leadTime || 'N/A') + ' days</div>' +
+                    '<div class="mb-2"><strong>Status:</strong> ' + getStatusBadge(supplier.isActive ? 'active' : 'inactive') + '</div>' +
+                    '<div class="mb-2"><strong>Created:</strong> ' + formatDate(supplier.createdAt) + '</div>' +
+                    '<div class="mb-2"><strong>Last Updated:</strong> ' + formatDate(supplier.updatedAt) + '</div>' +
+                '</div>' +
+            '</div>' +
+            '<hr>' +
+            '<div><h6 class="text-muted">Address</h6>' + addressHtml + '</div>';
+
+        // Store supplier ID for edit button
+        var editBtn = document.getElementById('viewSupplierEditBtn');
+        if (editBtn) {
+            editBtn.setAttribute('data-supplier-id', supplierId);
+        }
+
+        showModal('viewSupplierModal');
+    } catch (error) {
+        showToast('Error loading supplier: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Edit supplier from view modal
+ */
+function editSupplierFromView() {
+    var editBtn = document.getElementById('viewSupplierEditBtn');
+    if (editBtn) {
+        var supplierId = editBtn.getAttribute('data-supplier-id');
+        hideModal('viewSupplierModal');
+        setTimeout(function() {
+            editSupplier(supplierId);
+        }, 300);
+    }
+}
+
+/**
+ * Delete supplier
+ */
+async function deleteSupplier(supplierId) {
+    if (!confirm('Are you sure you want to delete this supplier?')) {
+        return;
+    }
+
+    try {
+        await api.delete('/suppliers/' + supplierId);
+        showToast('Supplier deleted successfully');
+        loadSuppliers();
+    } catch (error) {
+        showToast('Error deleting supplier: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Export suppliers to CSV
+ */
+async function exportSuppliers() {
+    try {
+        var apiBase = (typeof APP !== 'undefined' && APP.apiBase) ? APP.apiBase : 'http://localhost:5000/api';
+        var token = localStorage.getItem('token');
+        
+        var response = await fetch(apiBase + '/suppliers/export/csv', {
+            headers: {
+                'Authorization': 'Bearer ' + token,
+            },
+        });
+
+        if (!response.ok) {
+            var data = await response.json();
+            throw new Error(data.message || 'Export failed');
+        }
+
+        var blob = await response.blob();
+        var url = window.URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'suppliers-' + new Date().toISOString().split('T')[0] + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        showToast('Suppliers exported successfully');
+    } catch (error) {
+        showToast('Error exporting suppliers: ' + error.message, 'error');
+    }
+}
+
+/**
+ * Validate email helper
+ */
+function isValidEmail(email) {
+    if (!email) return false;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+// Make functions globally available
+window.loadSuppliers = loadSuppliers;
+window.openSupplierModal = openSupplierModal;
+window.saveSupplier = saveSupplier;
+window.editSupplier = editSupplier;
+window.viewSupplier = viewSupplier;
+window.deleteSupplier = deleteSupplier;
+window.changeSupplierPage = changeSupplierPage;
+window.exportSuppliers = exportSuppliers;
+window.applySupplierFilters = applySupplierFilters;
+window.clearSupplierFilters = clearSupplierFilters;
+window.handleSupplierSearch = handleSupplierSearch;
+window.editSupplierFromView = editSupplierFromView;

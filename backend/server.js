@@ -18,15 +18,18 @@ const authRoutes = require('./src/routes/authRoutes');
 const productRoutes = require('./src/routes/productRoutes');
 const categoryRoutes = require('./src/routes/categoryRoutes');
 const supplierRoutes = require('./src/routes/supplierRoutes');
+const orderRoutes = require('./src/routes/orderRoutes');
+const inventoryRoutes = require('./src/routes/inventoryRoutes');
 const dashboardRoutes = require('./src/routes/dashboardRoutes');
+const reportRoutes = require('./src/routes/reportRoutes');
 
-// Initialize express app
+// Initialize Express
 const app = express();
 
-// Connect to database
+// Connect Database
 connectDB();
 
-// Create upload directories
+// Create required folders
 const uploadDirs = [
     './src/uploads',
     './src/uploads/products',
@@ -42,34 +45,45 @@ uploadDirs.forEach(dir => {
     }
 });
 
-// Middleware
-app.use(helmet());
-app.use(cors({
-    origin: process.env.CORS_ORIGIN || '*',
-    credentials: true,
-    optionsSuccessStatus: 200
+// Security
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
-// Body parser middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// CORS
+app.use(cors({
+    origin: process.env.CORS_ORIGIN || "*",
+    credentials: true
+}));
 
-// Static files
+// Body Parser
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
+
+// Uploads
 app.use('/uploads', express.static(path.join(__dirname, 'src/uploads')));
 
-// Logging middleware
+// Frontend
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// Logger
 app.use(morgan('combined', { stream: logger.stream }));
 
-// Rate limiting
+// Rate Limiter
 app.use('/api', globalLimiter);
 
-// Health check endpoint
+// Home Page
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
+// Health Check
 app.get('/health', (req, res) => {
-    res.status(200).json({
+    res.json({
         success: true,
         message: 'Server is running',
-        timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV,
+        timestamp: new Date().toISOString(),
         uptime: process.uptime()
     });
 });
@@ -79,9 +93,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/suppliers', supplierRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/inventory', inventoryRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/reports', reportRoutes);
 
-// 404 handler
+// 404
 app.use((req, res) => {
     res.status(404).json({
         success: false,
@@ -89,35 +106,36 @@ app.use((req, res) => {
     });
 });
 
-// Global error handler
+// Error Handler
 app.use(errorHandler);
 
-// Start server
+// Start Server
 const PORT = process.env.PORT || 5000;
+
 const server = app.listen(PORT, () => {
-    logger.info(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-    logger.info(`Health check: http://localhost:${PORT}/health`);
+    logger.info(`Server running on http://localhost:${PORT}`);
+    logger.info(`Frontend: http://localhost:${PORT}`);
+    logger.info(`API: http://localhost:${PORT}/api`);
 });
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-    logger.error('Unhandled Promise Rejection:', err);
-    // Close server & exit process
+// Unhandled Promise Rejection
+process.on('unhandledRejection', err => {
+    logger.error(err);
     server.close(() => process.exit(1));
 });
 
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-    logger.error('Uncaught Exception:', err);
+// Uncaught Exception
+process.on('uncaughtException', err => {
+    logger.error(err);
     server.close(() => process.exit(1));
 });
 
-// Graceful shutdown
+// Graceful Shutdown
 process.on('SIGTERM', () => {
-    logger.info('SIGTERM signal received. Closing server...');
+    logger.info('SIGTERM received');
     server.close(() => {
         mongoose.connection.close(false, () => {
-            logger.info('MongoDB connection closed. Process terminated.');
+            logger.info('MongoDB disconnected');
             process.exit(0);
         });
     });
