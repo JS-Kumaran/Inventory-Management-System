@@ -17,3 +17,15 @@
 {"level":"info","message":"Frontend: http://localhost:5000","timestamp":"2026-06-26 10:06:10"}
 {"level":"info","message":"API: http://localhost:5000/api","timestamp":"2026-06-26 10:06:10"}
 {"level":"info","message":"MongoDB Connected: ac-eebpw8e-shard-00-00.kuh0p3k.mongodb.net","timestamp":"2026-06-26 10:06:11"}
+{"level":"info","message":"::1 - - [26/Jun/2026:05:39:02 +0000] \"POST /api/auth/register HTTP/1.1\" - - \"http://127.0.0.1:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0\"","timestamp":"2026-06-26 11:09:02"}
+{"level":"info","message":"Server running in development mode on port 5000","timestamp":"2026-06-26 11:10:46"}
+{"level":"info","message":"Health check: http://localhost:5000/health","timestamp":"2026-06-26 11:10:46"}
+{"level":"info","message":"API Base URL: http://localhost:5000/api","timestamp":"2026-06-26 11:10:46"}
+{"level":"info","message":"Test endpoint: http://localhost:5000/api/test","timestamp":"2026-06-26 11:10:46"}
+{"level":"info","message":"MongoDB Connected: ac-eebpw8e-shard-00-00.kuh0p3k.mongodb.net","timestamp":"2026-06-26 11:10:47"}
+{"level":"info","message":"::1 - - [26/Jun/2026:05:41:02 +0000] \"POST /api/auth/login HTTP/1.1\" - - \"http://127.0.0.1:3000/\" \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0\"","timestamp":"2026-06-26 11:11:02"}
+{"level":"info","message":"Server running in development mode on port 5000","timestamp":"2026-06-26 11:16:30"}
+{"level":"info","message":"Health check: http://localhost:5000/health","timestamp":"2026-06-26 11:16:30"}
+{"level":"info","message":"API Base URL: http://localhost:5000/api","timestamp":"2026-06-26 11:16:30"}
+{"level":"info","message":"Test endpoint: http://localhost:5000/api/test","timestamp":"2026-06-26 11:16:30"}
+{"level":"info","message":"MongoDB Connected: ac-eebpw8e-shard-00-00.kuh0p3k.mongodb.net","timestamp":"2026-06-26 11:16:31"}

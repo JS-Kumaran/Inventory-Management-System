@@ -1,6 +1,6 @@
 /**
- * @description Authentication Module
- * @description Handles login, registration, and password management
+ * Authentication Module
+ * Handles login, registration, and password management
  * @version 1.0.0
  */
 
@@ -40,7 +40,7 @@ function requireGuest() {
 // Login function
 async function login(email, password) {
     try {
-        var apiBase = (typeof APP !== 'undefined' && window.window.window.window.APP.apiBase) ? window.window.window.window.APP.apiBase : 'http://localhost:5000/api';
+        var apiBase = (typeof APP !== 'undefined' && APP.apiBase) ? APP.apiBase : 'http://localhost:5000/api';
         var response = await fetch(apiBase + '/auth/login', {
             method: 'POST',
             headers: {
@@ -67,7 +67,7 @@ async function login(email, password) {
 // Register function
 async function register(userData) {
     try {
-        var apiBase = (typeof APP !== 'undefined' && window.window.window.APP.apiBase) ? window.window.window.APP.apiBase : 'http://localhost:5000/api';
+        var apiBase = (typeof APP !== 'undefined' && APP.apiBase) ? APP.apiBase : 'http://localhost:5000/api';
         var response = await fetch(apiBase + '/auth/register', {
             method: 'POST',
             headers: {
@@ -93,7 +93,7 @@ async function logout() {
     try {
         var token = localStorage.getItem('token');
         if (token) {
-            var apiBase = (typeof APP !== 'undefined' && window.window.window.APP.apiBase) ? window.window.window.APP.apiBase : 'http://localhost:5000/api';
+            var apiBase = (typeof APP !== 'undefined' && APP.apiBase) ? APP.apiBase : 'http://localhost:5000/api';
             await fetch(apiBase + '/auth/logout', {
                 method: 'POST',
                 headers: {
@@ -124,7 +124,7 @@ function getCurrentUser() {
 async function updateProfile(profileData) {
     try {
         var token = localStorage.getItem('token');
-        var apiBase = (typeof APP !== 'undefined' && window.window.window.APP.apiBase) ? window.window.window.APP.apiBase : 'http://localhost:5000/api';
+        var apiBase = (typeof APP !== 'undefined' && APP.apiBase) ? APP.apiBase : 'http://localhost:5000/api';
         var response = await fetch(apiBase + '/auth/updateprofile', {
             method: 'PUT',
             headers: {
@@ -150,7 +150,7 @@ async function updateProfile(profileData) {
 async function changePassword(currentPassword, newPassword) {
     try {
         var token = localStorage.getItem('token');
-        var apiBase = (typeof APP !== 'undefined' && window.window.window.APP.apiBase) ? window.window.window.APP.apiBase : 'http://localhost:5000/api';
+        var apiBase = (typeof APP !== 'undefined' && APP.apiBase) ? APP.apiBase : 'http://localhost:5000/api';
         var response = await fetch(apiBase + '/auth/changepassword', {
             method: 'PUT',
             headers: {
@@ -177,7 +177,7 @@ async function changePassword(currentPassword, newPassword) {
 // Forgot password
 async function forgotPassword(email) {
     try {
-        var apiBase = (typeof APP !== 'undefined' && window.window.window.APP.apiBase) ? window.window.window.APP.apiBase : 'http://localhost:5000/api';
+        var apiBase = (typeof APP !== 'undefined' && APP.apiBase) ? APP.apiBase : 'http://localhost:5000/api';
         var response = await fetch(apiBase + '/auth/forgotpassword', {
             method: 'POST',
             headers: {
@@ -200,7 +200,7 @@ async function forgotPassword(email) {
 // Reset password
 async function resetPassword(token, password) {
     try {
-        var apiBase = (typeof APP !== 'undefined' && window.window.window.APP.apiBase) ? window.window.window.APP.apiBase : 'http://localhost:5000/api';
+        var apiBase = (typeof APP !== 'undefined' && APP.apiBase) ? APP.apiBase : 'http://localhost:5000/api';
         var response = await fetch(apiBase + '/auth/resetpassword/' + token, {
             method: 'POST',
             headers: {

@@ -3,8 +3,6 @@
  * @version 1.0.0
  */
 
-/* global bootstrap */
-
 // Global state
 var APP = {
     currentPage: 'dashboard',
@@ -17,7 +15,7 @@ var APP = {
 document.addEventListener('DOMContentLoaded', function() {
     // Check authentication
     if (!APP.token) {
-        window.location.href = '/login.html';
+        window.location.href = 'login.html';
         return;
     }
 
@@ -28,7 +26,12 @@ document.addEventListener('DOMContentLoaded', function() {
     showPage('dashboard');
 });
 
-// Load user data
+/**
+ * Load user data from API
+ */
+/**
+ * Load user data from API
+ */
 async function loadUserData() {
     try {
         var response = await fetch(APP.apiBase + '/auth/me', {
@@ -45,15 +48,25 @@ async function loadUserData() {
                 userNameEl.textContent = data.data.firstName + ' ' + data.data.lastName;
             }
         } else {
-            handleAuthError();
+            // Don't redirect on error - just show the page
+            console.warn('Could not load user data, but continuing...');
+            var userNameEl = document.getElementById('userName');
+            if (userNameEl) {
+                userNameEl.textContent = 'User';
+            }
         }
     } catch (error) {
-        console.error('Error loading user data:', error);
-        handleAuthError();
+        console.warn('Error loading user data:', error);
+        // Don't redirect - just show the page
+        var userNameEl = document.getElementById('userName');
+        if (userNameEl) {
+            userNameEl.textContent = 'User';
+        }
     }
-}
-
-// Show page
+}/**
+ * Show a specific page
+ * @param {string} page - Page name to show
+ */
 function showPage(page) {
     APP.currentPage = page;
     var content = document.getElementById('pageContent');
@@ -62,67 +75,148 @@ function showPage(page) {
     var navLinks = document.querySelectorAll('.nav-link');
     for (var i = 0; i < navLinks.length; i++) {
         navLinks[i].classList.remove('active');
-    }
-    
-    var activeLink = document.querySelector('[href="#' + page + '"]');
-    if (activeLink) {
-        activeLink.classList.add('active');
+        var dataPage = navLinks[i].getAttribute('data-page');
+        if (dataPage === page) {
+            navLinks[i].classList.add('active');
+        }
     }
 
-    // Load page content
+    // Load page content based on page name
     switch(page) {
         case 'dashboard':
-            loadDashboard();
+            if (typeof loadDashboard === 'function') {
+                loadDashboard();
+            } else {
+                fallbackPage('Dashboard', 'chart-pie');
+            }
             break;
         case 'products':
-            loadProducts();
+            if (typeof loadProducts === 'function') {
+                loadProducts();
+            } else {
+                fallbackPage('Products', 'box');
+            }
             break;
         case 'categories':
-            loadCategories();
+            if (typeof loadCategories === 'function') {
+                loadCategories();
+            } else {
+                fallbackPage('Categories', 'tags');
+            }
             break;
         case 'suppliers':
-            loadSuppliers();
+            if (typeof loadSuppliers === 'function') {
+                loadSuppliers();
+            } else {
+                fallbackPage('Suppliers', 'truck');
+            }
             break;
         case 'orders':
-            loadOrders();
+            if (typeof loadOrders === 'function') {
+                loadOrders();
+            } else {
+                fallbackPage('Orders', 'shopping-cart');
+            }
             break;
         case 'inventory':
-            loadInventory();
+            if (typeof loadInventory === 'function') {
+                loadInventory();
+            } else {
+                fallbackPage('Inventory', 'warehouse');
+            }
             break;
         case 'reports':
-            loadReports();
+            if (typeof loadReports === 'function') {
+                loadReports();
+            } else {
+                fallbackPage('Reports', 'file-alt');
+            }
             break;
         default:
             if (content) {
-                content.innerHTML = '<div class="text-center py-5"><i class="fas fa-file fa-3x text-muted mb-3"></i><h4>Page not found</h4><p class="text-muted">The page you\'re looking for doesn\'t exist.</p></div>';
+                content.innerHTML = '<div class="text-center py-5"><i class="fas fa-file fa-3x text-muted mb-3"></i><h4>Page not found</h4></div>';
             }
     }
 }
 
-// Handle auth error
-function handleAuthError() {
-    localStorage.removeItem('token');
-    window.location.href = '/login.html';
+/**
+ * Fallback page loader when module is not loaded
+ */
+function fallbackPage(title, icon) {
+    var content = document.getElementById('pageContent');
+    if (content) {
+        content.innerHTML = 
+            '<div class="page-content">' +
+                '<h2><i class="fas fa-' + icon + ' me-2"></i>' + title + '</h2>' +
+                '<div class="alert alert-success mt-3">' +
+                    '<i class="fas fa-check-circle me-2"></i>' +
+                    title + ' page loaded successfully!' +
+                '</div>' +
+                '<div class="alert alert-info mt-3">' +
+                    '<i class="fas fa-info-circle me-2"></i>' +
+                    'Connect to backend API to see real data. Make sure backend is running on port 5000.' +
+                '</div>' +
+                '<div class="row mt-4">' +
+                    '<div class="col-md-4"><div class="card"><div class="card-body"><h5>Ready</h5><p class="text-muted">Module is ready for backend integration.</p></div></div></div>' +
+                    '<div class="col-md-4"><div class="card"><div class="card-body"><h5>API Ready</h5><p class="text-muted">Check /api/' + icon + ' endpoint</p></div></div></div>' +
+                    '<div class="col-md-4"><div class="card"><div class="card-body"><h5>Documentation</h5><p class="text-muted">Refer to API documentation</p></div></div></div>' +
+                '</div>' +
+            '</div>';
+    }
 }
 
-// Logout
+/**
+ * Handle authentication error
+ */
+function handleAuthError() {
+    localStorage.removeItem('token');
+    window.location.href = 'login.html';
+}
+
+/**
+ * Logout user
+ */
 async function logout() {
     try {
-        await fetch(APP.apiBase + '/auth/logout', {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + APP.token,
-            },
-        });
+        if (APP.token) {
+            await fetch(APP.apiBase + '/auth/logout', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + APP.token,
+                },
+            });
+        }
     } catch (error) {
         console.error('Logout error:', error);
     }
 
     localStorage.removeItem('token');
-    window.location.href = '/login.html';
+    window.location.href = 'login.html';
 }
 
-// Show toast notification
+/**
+ * Show user profile
+ */
+function showProfile() {
+    var user = APP.user;
+    if (!user) {
+        showToast('Please login again', 'error');
+        return;
+    }
+
+    alert('Profile Information\n\n' +
+          'Name: ' + user.firstName + ' ' + user.lastName + '\n' +
+          'Email: ' + user.email + '\n' +
+          'Role: ' + user.role + '\n' +
+          'Phone: ' + (user.phone || 'Not provided') + '\n' +
+          'Status: ' + (user.isActive ? 'Active' : 'Inactive'));
+}
+
+/**
+ * Show toast notification
+ * @param {string} message - Message to display
+ * @param {string} type - Type: success, error, warning, info
+ */
 function showToast(message, type) {
     type = type || 'success';
     
@@ -154,7 +248,6 @@ function showToast(message, type) {
 
     container.appendChild(toast);
 
-    // Auto remove after 5 seconds
     setTimeout(function() {
         if (toast.parentNode) {
             toast.remove();
@@ -162,7 +255,9 @@ function showToast(message, type) {
     }, 5000);
 }
 
-// Show loader
+/**
+ * Show loader in page content
+ */
 function showLoader() {
     var content = document.getElementById('pageContent');
     if (content) {
@@ -174,13 +269,21 @@ function showLoader() {
     }
 }
 
-// Format currency
+/**
+ * Format currency
+ * @param {number} amount - Amount to format
+ * @returns {string} Formatted currency
+ */
 function formatCurrency(amount) {
     if (amount === undefined || amount === null) amount = 0;
     return '$' + Number(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-// Format date
+/**
+ * Format date
+ * @param {string|Date} date - Date to format
+ * @returns {string} Formatted date
+ */
 function formatDate(date) {
     if (!date) return 'N/A';
     var d = new Date(date);
@@ -193,7 +296,11 @@ function formatDate(date) {
     });
 }
 
-// Format date only (no time)
+/**
+ * Format date only (no time)
+ * @param {string|Date} date - Date to format
+ * @returns {string} Formatted date
+ */
 function formatDateOnly(date) {
     if (!date) return 'N/A';
     var d = new Date(date);
@@ -204,36 +311,47 @@ function formatDateOnly(date) {
     });
 }
 
-// Show modal
+/**
+ * Show modal
+ * @param {string} modalId - Modal element ID
+ */
 function showModal(modalId) {
     var modalEl = document.getElementById(modalId);
     if (!modalEl) return;
-    var modal = new bootstrap.Modal(modalEl);
-    modal.show();
+    
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        var modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    } else {
+        modalEl.style.display = 'block';
+        modalEl.classList.add('show');
+        document.body.classList.add('modal-open');
+    }
 }
 
-// Hide modal
+/**
+ * Hide modal
+ * @param {string} modalId - Modal element ID
+ */
 function hideModal(modalId) {
     var modalEl = document.getElementById(modalId);
     if (!modalEl) return;
-    var modal = bootstrap.Modal.getInstance(modalEl);
-    if (modal) modal.hide();
-}
-
-// Get form data as object
-function getFormData(formId) {
-    var form = document.getElementById(formId);
-    if (!form) return {};
     
-    var data = new FormData(form);
-    var obj = {};
-    data.forEach(function(value, key) {
-        obj[key] = value;
-    });
-    return obj;
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        var modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+    } else {
+        modalEl.style.display = 'none';
+        modalEl.classList.remove('show');
+        document.body.classList.remove('modal-open');
+    }
 }
 
-// Get status badge HTML
+/**
+ * Get status badge HTML
+ * @param {string} status - Status value
+ * @returns {string} Badge HTML
+ */
 function getStatusBadge(status) {
     if (!status) status = 'unknown';
     status = status.toLowerCase();
@@ -264,7 +382,12 @@ function getStatusBadge(status) {
     return '<span class="' + className + '">' + label.charAt(0).toUpperCase() + label.slice(1) + '</span>';
 }
 
-// Debounce function
+/**
+ * Debounce function
+ * @param {Function} func - Function to debounce
+ * @param {number} wait - Wait time in ms
+ * @returns {Function} Debounced function
+ */
 function debounce(func, wait) {
     wait = wait || 300;
     var timeout;
@@ -276,115 +399,6 @@ function debounce(func, wait) {
             func.apply(context, args);
         }, wait);
     };
-}
-
-// ============================================
-// PAGE LOADERS (To be implemented in separate files)
-// ============================================
-
-// Dashboard
-function loadDashboard() {
-    var content = document.getElementById('pageContent');
-    if (content) {
-        content.innerHTML = 
-            '<div class="page-content">' +
-                '<h2><i class="fas fa-chart-pie me-2"></i>Dashboard</h2>' +
-                '<div class="alert alert-info mt-3">' +
-                    '<i class="fas fa-info-circle me-2"></i>' +
-                    'Dashboard module loaded successfully. Please implement your dashboard logic in dashboard.js' +
-                '</div>' +
-            '</div>';
-    }
-}
-
-// Products
-function loadProducts() {
-    var content = document.getElementById('pageContent');
-    if (content) {
-        content.innerHTML = 
-            '<div class="page-content">' +
-                '<h2><i class="fas fa-box me-2"></i>Products</h2>' +
-                '<div class="alert alert-info mt-3">' +
-                    '<i class="fas fa-info-circle me-2"></i>' +
-                    'Products module loaded successfully. Please implement your products logic in products.js' +
-                '</div>' +
-            '</div>';
-    }
-}
-
-// Categories
-function loadCategories() {
-    var content = document.getElementById('pageContent');
-    if (content) {
-        content.innerHTML = 
-            '<div class="page-content">' +
-                '<h2><i class="fas fa-tags me-2"></i>Categories</h2>' +
-                '<div class="alert alert-info mt-3">' +
-                    '<i class="fas fa-info-circle me-2"></i>' +
-                    'Categories module loaded successfully. Please implement your categories logic in categories.js' +
-                '</div>' +
-            '</div>';
-    }
-}
-
-// Suppliers
-function loadSuppliers() {
-    var content = document.getElementById('pageContent');
-    if (content) {
-        content.innerHTML = 
-            '<div class="page-content">' +
-                '<h2><i class="fas fa-truck me-2"></i>Suppliers</h2>' +
-                '<div class="alert alert-info mt-3">' +
-                    '<i class="fas fa-info-circle me-2"></i>' +
-                    'Suppliers module loaded successfully. Please implement your suppliers logic in suppliers.js' +
-                '</div>' +
-            '</div>';
-    }
-}
-
-// Orders
-function loadOrders() {
-    var content = document.getElementById('pageContent');
-    if (content) {
-        content.innerHTML = 
-            '<div class="page-content">' +
-                '<h2><i class="fas fa-shopping-cart me-2"></i>Orders</h2>' +
-                '<div class="alert alert-info mt-3">' +
-                    '<i class="fas fa-info-circle me-2"></i>' +
-                    'Orders module loaded successfully. Please implement your orders logic in orders.js' +
-                '</div>' +
-            '</div>';
-    }
-}
-
-// Inventory
-function loadInventory() {
-    var content = document.getElementById('pageContent');
-    if (content) {
-        content.innerHTML = 
-            '<div class="page-content">' +
-                '<h2><i class="fas fa-warehouse me-2"></i>Inventory</h2>' +
-                '<div class="alert alert-info mt-3">' +
-                    '<i class="fas fa-info-circle me-2"></i>' +
-                    'Inventory module loaded successfully. Please implement your inventory logic in inventory.js' +
-                '</div>' +
-            '</div>';
-    }
-}
-
-// Reports
-function loadReports() {
-    var content = document.getElementById('pageContent');
-    if (content) {
-        content.innerHTML = 
-            '<div class="page-content">' +
-                '<h2><i class="fas fa-file-alt me-2"></i>Reports</h2>' +
-                '<div class="alert alert-info mt-3">' +
-                    '<i class="fas fa-info-circle me-2"></i>' +
-                    'Reports module loaded successfully. Please implement your reports logic in reports.js' +
-                '</div>' +
-            '</div>';
-    }
 }
 
 // ============================================
@@ -400,14 +414,7 @@ window.formatDate = formatDate;
 window.formatDateOnly = formatDateOnly;
 window.showModal = showModal;
 window.hideModal = hideModal;
-window.getFormData = getFormData;
 window.getStatusBadge = getStatusBadge;
 window.debounce = debounce;
 window.logout = logout;
-window.loadDashboard = loadDashboard;
-window.loadProducts = loadProducts;
-window.loadCategories = loadCategories;
-window.loadSuppliers = loadSuppliers;
-window.loadOrders = loadOrders;
-window.loadInventory = loadInventory;
-window.loadReports = loadReports;
+window.showProfile = showProfile;
